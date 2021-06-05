@@ -7,6 +7,14 @@ const theme = createMuiTheme({
   typography: {
     fontFamily: ['"Josefin Sans"', "sans-serif"],
   },
+  palette: {
+    primary: {
+      main: "#14213d"
+    },
+    secondary: {
+      main: "#fca311"
+    }
+  }
 });
 
 function App() {

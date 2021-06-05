@@ -7,6 +7,8 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 
+import withError from "./withError";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -19,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Header = () => {
+const Header = ({ alertError }) => {
   const classes = useStyles();
 
   return (
@@ -37,11 +39,29 @@ const Header = () => {
           <Typography variant="h6" className={classes.title}>
             CypherMe
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Button
+            onClick={() => {
+              if (typeof window.zilPay === "undefined") {
+                alertError("You need ZilPay to signin.");
+              } else {
+                const message =
+                  "Here we are you fuckers lal alalala alallalalal";
+
+                window.zilPay.wallet
+                  .connect()
+                  .then((r) => window.zilPay.wallet.sign(message))
+                  .then((signed) => console.log(signed))
+                  .catch((err) => alertError(err));
+              }
+            }}
+            color="inherit"
+          >
+            Login
+          </Button>
         </Toolbar>
       </AppBar>
     </div>
   );
 };
 
-export default Header;
+export default withError(Header);
