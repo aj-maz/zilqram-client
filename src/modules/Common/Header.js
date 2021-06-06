@@ -7,6 +7,8 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 
+import { useMutation, gql } from "@apollo/client";
+
 import withError from "./withError";
 
 const useStyles = makeStyles((theme) => ({
@@ -21,8 +23,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const GET_NOUNCE = gql`
+  mutation getNounce($address: String!) {
+    getNounce(address: $address)
+  }
+`;
+
+const GET_TOKEN = gql`
+  mutation getToken(
+    $address: String!
+    $signedMessage: String!
+    $publicKey: String!
+  ) {
+    getToken(
+      address: $address
+      signedMessage: $signedMessage
+      publicKey: $publicKey
+    )
+  }
+`;
+
 const Header = ({ alertError }) => {
   const classes = useStyles();
+
+  const [getNounce] = useMutation(GET_NOUNCE);
+  const [getToken] = useMutation(GET_TOKEN);
 
   return (
     <div className={classes.root}>
@@ -44,13 +69,32 @@ const Header = ({ alertError }) => {
               if (typeof window.zilPay === "undefined") {
                 alertError("You need ZilPay to signin.");
               } else {
-                const message =
-                  "Here we are you fuckers lal alalala alallalalal";
-
+                // Update the store and localstorage
+                const address = window.zilPay.wallet.defaultAccount.base16;
                 window.zilPay.wallet
                   .connect()
-                  .then((r) => window.zilPay.wallet.sign(message))
-                  .then((signed) => console.log(signed))
+                  .then((r) => {
+                    getNounce({
+                      variables: {
+                        address,
+                      },
+                    })
+                      .then(({ data }) => data.getNounce)
+                      .then((nounce) => window.zilPay.wallet.sign(nounce))
+                      .then(({ signature: signedMessage, publicKey }) => {
+                        return getToken({
+                          variables: {
+                            signedMessage,
+                            address,
+                            publicKey,
+                          },
+                        });
+                      })
+                      .then((res) => {
+                        // Handle Storing JWT logic !!!
+                      })
+                      .catch((err) => alertError(err));
+                  })
                   .catch((err) => alertError(err));
               }
             }}

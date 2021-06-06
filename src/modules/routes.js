@@ -59,7 +59,7 @@ const Routes = () => {
                     <ContentHeader
                       image="/images/sample1.png"
                       displayName="Dorsa Hosseini"
-                      followed={false}
+                      followed={true}
                     />
                     <ContentPicture src="/images/sample1.png" />
                     <ContentActions />

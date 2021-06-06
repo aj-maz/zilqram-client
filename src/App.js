@@ -1,5 +1,6 @@
 import logo from "./logo.svg";
 import { ThemeProvider, createMuiTheme, Typography } from "@material-ui/core";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 import Routes from "./modules/routes";
 
@@ -9,19 +10,28 @@ const theme = createMuiTheme({
   },
   palette: {
     primary: {
-      main: "#14213d"
+      main: "#14213d",
     },
     secondary: {
-      main: "#fca311"
-    }
-  }
+      main: "#fca311",
+    },
+  },
+});
+
+const GRAPHQL_SERVER = "http://localhost:4000";
+
+const client = new ApolloClient({
+  uri: GRAPHQL_SERVER,
+  cache: new InMemoryCache(),
 });
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <Routes />
-    </ThemeProvider>
+    <ApolloProvider client={client}>
+      <ThemeProvider theme={theme}>
+        <Routes />
+      </ThemeProvider>{" "}
+    </ApolloProvider>
   );
 }
 

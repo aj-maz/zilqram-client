@@ -49,7 +49,7 @@ const ContentHeader = ({ image, displayName, followed }) => {
               Unfollow
             </Button>
           ) : (
-            <Button variant="text" size="small" color="primary">
+            <Button  variant="outlined" size="small" color="primary" >
               Follow
             </Button>
           )}
