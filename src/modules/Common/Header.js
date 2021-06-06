@@ -6,6 +6,7 @@ import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import { useHistory } from 'react-router-dom'
 
 import { useMutation, gql, useQuery } from "@apollo/client";
 
@@ -67,6 +68,16 @@ const Header = ({ alertError, setZilpayConenction, zilpayConnection }) => {
 
   const [getNounce] = useMutation(GET_NOUNCE);
   const [getToken] = useMutation(GET_TOKEN);
+
+  const history = useHistory()
+
+  useEffect(() => {
+    if(data && data.me && zilpayConnection) {
+      if(!data.me.setted) {
+        history.push('/profile')
+      }
+    }
+  }, [data, zilpayConnection])
 
   const renderOptions = () => {
     if (loading) return <div>Loading ...</div>;
