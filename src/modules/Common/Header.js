@@ -60,7 +60,7 @@ const GET_TOKEN = gql`
   }
 `;
 
-const Header = ({ alertError }) => {
+const Header = ({ alertError, setZilpayConenction, zilpayConnection }) => {
   const classes = useStyles();
 
   const { client, data, loading, error, refetch } = useQuery(ME);
@@ -68,11 +68,9 @@ const Header = ({ alertError }) => {
   const [getNounce] = useMutation(GET_NOUNCE);
   const [getToken] = useMutation(GET_TOKEN);
 
-  console.log(data, loading, error);
-
   const renderOptions = () => {
     if (loading) return <div>Loading ...</div>;
-    if (data && data.me)
+    if (data && data.me && zilpayConnection)
       return (
         <div>
           <Button
@@ -95,10 +93,11 @@ const Header = ({ alertError }) => {
             alertError("You need ZilPay to signin.");
           } else {
             // Update the store and localstorage
-            const address = window.zilPay.wallet.defaultAccount.base16;
             window.zilPay.wallet
               .connect()
-              .then((r) => {
+              .then(() => setZilpayConenction(true))
+              .then(() => {
+                const address = window.zilPay.wallet.defaultAccount.base16;
                 getNounce({
                   variables: {
                     address,

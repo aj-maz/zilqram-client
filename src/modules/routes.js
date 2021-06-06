@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core";
 import { Row, Col, Container } from "react-grid-system";
 
@@ -30,11 +30,22 @@ const useStyles = makeStyles((theme) => ({
 const Routes = () => {
   const classes = useStyles();
 
-  
+  const [zilpayConnection, setZilpayConenction] = useState(false);
+
+  useEffect(() => {
+    if (!zilpayConnection) {
+      window.zilPay.wallet.connect().then(() => {
+        setZilpayConenction(true);
+      });
+    }
+  }, []);
 
   return (
     <div>
-      <Header />
+      <Header
+        zilpayConnection={zilpayConnection}
+        setZilpayConenction={setZilpayConenction}
+      />
       <div className={classes.content}>
         <Row styles={{ background: "#e5e5e5" }}>
           <Col md={3}>
