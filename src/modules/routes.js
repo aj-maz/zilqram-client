@@ -9,7 +9,9 @@ import HomePage from "./Pages/Home";
 import ProfilePage from './Pages/Profile'
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+
+  },
   content: {
     margin: theme.spacing(2),
   },
@@ -52,7 +54,7 @@ const Routes = () => {
 
   return (
     <Router>
-      <div>
+      <div className={classes.root}>
         <Header
           zilpayConnection={zilpayConnection}
           setZilpayConenction={setZilpayConenction}

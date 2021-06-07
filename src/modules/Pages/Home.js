@@ -25,7 +25,7 @@ const HomePage = () => {
   const classes = useStyles();
 
   return (
-    <Row styles={{ background: "#e5e5e5" }}>
+    <Row >
       <Col md={3}>
         <div className={classes.profileHeader}>
           <ProfileHeader

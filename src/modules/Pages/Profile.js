@@ -6,9 +6,11 @@ import ReactLoading from "react-loading";
 import CompleteProfile from "../Profile/CompleteProfile";
 
 import ProfileHeader from "../Profile/ProfileHeader";
+import ProfileActions from '../Profile/ProfileActions'
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+  },
   loadingContainer: {
     height: "80vh",
     width: "100%",
@@ -16,6 +18,9 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     alignItems: "center",
   },
+  container: {
+    marginBottom: theme.spacing(2)
+  }
 }));
 
 const ProfilePage = ({ data, refetch, loading }) => {
@@ -47,11 +52,17 @@ const ProfilePage = ({ data, refetch, loading }) => {
       <div>
         <Row>
           <Col md={3}>
+            <div className={classes.container}>
             <ProfileHeader
               avatar={user.avatar}
               username={user.username}
               name={user.displayName}
             />
+            </div>
+            <div className={classes.container}>
+            <ProfileActions
+            />
+            </div>
           </Col>
         </Row>
       </div>
