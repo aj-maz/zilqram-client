@@ -7,6 +7,7 @@ import CompleteProfile from "../Profile/CompleteProfile";
 
 import ProfileHeader from "../Profile/ProfileHeader";
 import ProfileActions from '../Profile/ProfileActions'
+import ProfileContents from '../Profile/ProfileContents'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,6 +64,9 @@ const ProfilePage = ({ data, refetch, loading }) => {
             <ProfileActions
             />
             </div>
+          </Col>
+          <Col md={9}>
+            <ProfileContents />
           </Col>
         </Row>
       </div>
