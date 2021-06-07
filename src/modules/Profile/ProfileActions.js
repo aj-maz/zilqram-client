@@ -1,5 +1,6 @@
 import React from "react";
 import { makeStyles, Button } from "@material-ui/core";
+import { useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -10,6 +11,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ProfileActions = () => {
   const classes = useStyles();
+  const history = useHistory()
+
   return (
     <div className={classes.root}>
       <Button
@@ -25,6 +28,7 @@ const ProfileActions = () => {
         color="secondary"
         fullWidth
         className={classes.button}
+        onClick={() => history.push('/collections')}
       >
         Mint a NFT
       </Button>

@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import {  gql, useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 
 import Header from "./Common/Header";
 
 import HomePage from "./Pages/Home";
-import ProfilePage from './Pages/Profile'
+import ProfilePage from "./Pages/Profile";
+import CollectionsPage from "./Pages/Collections";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-
-  },
+  root: {},
   content: {
     margin: theme.spacing(2),
   },
@@ -19,7 +18,6 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
   },
 }));
-
 
 const ME = gql`
   query me {
@@ -68,6 +66,9 @@ const Routes = () => {
           <Switch>
             <Route path="/profile">
               <ProfilePage loading={loading} data={data} refetch={refetch} />
+            </Route>
+            <Route path="/collections">
+              <CollectionsPage />
             </Route>
             <Route path="/">
               <HomePage />
