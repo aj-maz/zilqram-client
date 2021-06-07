@@ -33,10 +33,10 @@ const useStyles = makeStyles((theme) => ({
 const ProfileHeader = ({
   name,
   username,
-  followers,
-  followings,
-  contents,
-  nfts,
+  followers = 0,
+  followings = 0,
+  contents = 0,
+  nfts = 0,
   avatar,
   isMe,
 }) => {
@@ -45,14 +45,19 @@ const ProfileHeader = ({
     <Paper className={classes.root}>
       <div className={classes.primary}>
         <div className={classes.image}>
-          <Avatar className={classes.avatar} src={avatar} />
+          <Avatar
+            className={classes.avatar}
+            src={
+              avatar ? `${process.env.REACT_APP_FILE_URL}/${avatar}` : avatar
+            }
+          />
         </div>
         <div className={classes.info}>
           <Typography className={classes.name} variant="h6">
             {name}
           </Typography>
           <div className={classes.actions}>
-            <Typography variant="subtitle2">{username}</Typography>
+            <Typography variant="subtitle2">@{username}</Typography>
           </div>
         </div>
       </div>

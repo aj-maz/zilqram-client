@@ -6,7 +6,7 @@ import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
-import { useHistory } from 'react-router-dom'
+import { useHistory } from "react-router-dom";
 
 import { useMutation, gql, useQuery } from "@apollo/client";
 
@@ -24,22 +24,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ME = gql`
-  query me {
-    me {
-      _id
-      username
-      displayName
-      avatar
-      bio
-      setted
-      createdAt
-      updatedAt
-      addresses
-      nounce
-    }
-  }
-`;
 
 const GET_NOUNCE = gql`
   mutation getNounce($address: String!) {
@@ -61,23 +45,30 @@ const GET_TOKEN = gql`
   }
 `;
 
-const Header = ({ alertError, setZilpayConenction, zilpayConnection }) => {
+const Header = ({
+  alertError,
+  setZilpayConenction,
+  zilpayConnection,
+  client,
+  data,
+  loading,
+  error,
+  refetch,
+}) => {
   const classes = useStyles();
-
-  const { client, data, loading, error, refetch } = useQuery(ME);
 
   const [getNounce] = useMutation(GET_NOUNCE);
   const [getToken] = useMutation(GET_TOKEN);
 
-  const history = useHistory()
+  const history = useHistory();
 
   useEffect(() => {
-    if(data && data.me && zilpayConnection) {
-      if(!data.me.setted) {
-        history.push('/profile')
+    if (data && data.me && zilpayConnection) {
+      if (!data.me.setted) {
+        history.push("/profile");
       }
     }
-  }, [data, zilpayConnection])
+  }, [data, zilpayConnection]);
 
   const renderOptions = () => {
     if (loading) return <div>Loading ...</div>;
@@ -158,7 +149,7 @@ const Header = ({ alertError, setZilpayConenction, zilpayConnection }) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            CypherMe
+            Ziliqist
           </Typography>
           {renderOptions()}
         </Toolbar>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {  gql, useQuery } from "@apollo/client";
 
 import Header from "./Common/Header";
 
@@ -17,10 +18,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+const ME = gql`
+  query me {
+    me {
+      _id
+      username
+      displayName
+      avatar
+      bio
+      setted
+      createdAt
+      updatedAt
+      addresses
+      nounce
+    }
+  }
+`;
+
 const Routes = () => {
   const classes = useStyles();
 
   const [zilpayConnection, setZilpayConenction] = useState(false);
+  const { client, data, loading, error, refetch } = useQuery(ME);
 
   useEffect(() => {
     if (!zilpayConnection) {
@@ -36,11 +56,16 @@ const Routes = () => {
         <Header
           zilpayConnection={zilpayConnection}
           setZilpayConenction={setZilpayConenction}
+          client={client}
+          data={data}
+          loading={loading}
+          error={error}
+          refetch={refetch}
         />
         <div className={classes.content}>
           <Switch>
             <Route path="/profile">
-              <ProfilePage />
+              <ProfilePage loading={loading} data={data} refetch={refetch} />
             </Route>
             <Route path="/">
               <HomePage />
