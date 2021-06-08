@@ -15,6 +15,9 @@ import { Collections, CameraAlt } from "@material-ui/icons";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, gql } from "@apollo/client";
 import withError from "../Common/withError";
+import { useHistory } from 'react-router-dom'
+
+import NFTContract from "../Contracts/NFT";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,8 +76,14 @@ const CREATE_NFT_COLLECTION = gql`
     $logo: Upload!
     $name: String!
     $description: String
+    $contractAddress: String!
   ) {
-    createNftCollection(logo: $logo, name: $name, description: $description) {
+    createNftCollection(
+      logo: $logo
+      name: $name
+      description: $description
+      contractAddress: $contractAddress
+    ) {
       _id
     }
   }
@@ -85,6 +94,25 @@ const CreateCollectionCard = ({ alertError }) => {
   const [createCollection] = useMutation(CREATE_NFT_COLLECTION);
 
   const [open, setOpen] = useState(false);
+
+  // console.log(window.zilPay, NFTContract)
+
+  const history = useHistory()
+
+  const init = (collectionName) => [
+    {
+      vname: "contract_owner",
+      type: "ByStr20",
+      value: window.zilPay.wallet.defaultAccount.bech32, //"zil1zxvjnkxr3r0rv582rv7u0w07pnh0ap30td4thr"
+    },
+    { vname: "name", type: "String", value: collectionName },
+    { vname: "symbol", type: "String", value: collectionName },
+    {
+      vname: "_scilla_version",
+      type: "Uint32",
+      value: "0",
+    },
+  ];
 
   const {
     register,
@@ -221,19 +249,38 @@ const CreateCollectionCard = ({ alertError }) => {
             color="primary"
             variant="contained"
             onClick={() => {
-              createCollection({
-                variables: {
-                  ...watch(),
-                  logo: selectedLogo,
-                },
-              })
-                .then((collection) => {
-                  // TODO must go to collection page
-                  console.log(collection)
+              const contract = window.zilPay.contracts.new(
+                NFTContract,
+                init(watch().name)
+              );
+
+              contract
+                .deploy({
+                  gasLimit: "25000",
+                  gasPrice: "1000000000",
                 })
-                .catch((err) => {
-                  alertError(`collection ${watch().name} existed.`);
-                });
+                .then(([tx, contract]) => {
+                  console.log(tx, contract);
+
+                  console.log(contract, contract.address);
+
+
+                  createCollection({
+                    variables: {
+                      ...watch(),
+                      logo: selectedLogo,
+                      contractAddress: contract.address,
+                    },
+                  })
+                    .then(({data}) => {
+                      history.push(`/collection/${data.createNftCollection._id}`)
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                      alertError(`collection ${watch().name} existed.`);
+                    });
+                })
+                .catch((err) => console.log(err));
             }}
           >
             Create
