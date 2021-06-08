@@ -1,5 +1,6 @@
 import React from "react";
 import { makeStyles, Typography, Paper } from "@material-ui/core";
+import { useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,10 +32,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CollectionCard = ({ image, name }) => {
+const CollectionCard = ({ image, name , _id}) => {
   const classes = useStyles();
+  const history = useHistory()
   return (
-    <Paper className={classes.root}>
+    <Paper onClick={() => history.push(`/collection/${_id}`)} className={classes.root}>
       <div className={classes.container}>
         <div className={classes.imageContainer}>
           <img src={image} className={classes.image} />

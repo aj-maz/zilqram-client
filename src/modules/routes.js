@@ -4,15 +4,18 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 
 import Header from "./Common/Header";
+import Footer from './Common/Footer'
 
 import HomePage from "./Pages/Home";
 import ProfilePage from "./Pages/Profile";
 import CollectionsPage from "./Pages/Collections";
+import CollectionPage from "./Pages/Collection";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   content: {
     margin: theme.spacing(2),
+    minHeight: `calc(100vh - 134px)`
   },
   section: {
     marginBottom: theme.spacing(2),
@@ -62,20 +65,29 @@ const Routes = () => {
           error={error}
           refetch={refetch}
         />
-        <div className={classes.content}>
-          <Switch>
-            <Route path="/profile">
+        <Switch>
+          <Route path="/profile">
+            <div className={classes.content}>
               <ProfilePage loading={loading} data={data} refetch={refetch} />
-            </Route>
-            <Route path="/collections">
+            </div>
+          </Route>
+          <Route path="/collections">
+            <div className={classes.content}>
               <CollectionsPage />
-            </Route>
-            <Route path="/">
+            </div>
+          </Route>
+
+          <Route path="/collection/:_id">
+            <CollectionPage />
+          </Route>
+          <Route path="/">
+            <div className={classes.content}>
               <HomePage />
-            </Route>
-          </Switch>
-        </div>
+            </div>
+          </Route>
+        </Switch>
       </div>
+      <Footer />
     </Router>
   );
 };

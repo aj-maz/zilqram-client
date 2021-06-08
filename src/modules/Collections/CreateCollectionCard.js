@@ -13,6 +13,8 @@ import {
 } from "@material-ui/core";
 import { Collections, CameraAlt } from "@material-ui/icons";
 import { useForm, Controller } from "react-hook-form";
+import { useMutation, gql } from "@apollo/client";
+import withError from "../Common/withError";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,8 +68,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CreateCollectionCard = () => {
+const CREATE_NFT_COLLECTION = gql`
+  mutation createNftCollection(
+    $logo: Upload!
+    $name: String!
+    $description: String
+  ) {
+    createNftCollection(logo: $logo, name: $name, description: $description) {
+      _id
+    }
+  }
+`;
+
+const CreateCollectionCard = ({ alertError }) => {
   const classes = useStyles();
+  const [createCollection] = useMutation(CREATE_NFT_COLLECTION);
+
   const [open, setOpen] = useState(false);
 
   const {
@@ -76,11 +92,16 @@ const CreateCollectionCard = () => {
     watch,
     formState: { errors },
     control,
+    reset,
   } = useForm();
 
   const [selectedLogo, setSelectedLogo] = useState("");
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedLogo("");
+    reset();
+  };
 
   const onSubmit = (data) => console.log(data);
 
@@ -199,6 +220,21 @@ const CreateCollectionCard = () => {
             onClick={handleClose}
             color="primary"
             variant="contained"
+            onClick={() => {
+              createCollection({
+                variables: {
+                  ...watch(),
+                  logo: selectedLogo,
+                },
+              })
+                .then((collection) => {
+                  // TODO must go to collection page
+                  console.log(collection)
+                })
+                .catch((err) => {
+                  alertError(`collection ${watch().name} existed.`);
+                });
+            }}
           >
             Create
           </Button>
@@ -208,4 +244,4 @@ const CreateCollectionCard = () => {
   );
 };
 
-export default CreateCollectionCard;
+export default withError(CreateCollectionCard);
