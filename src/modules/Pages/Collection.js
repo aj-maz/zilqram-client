@@ -7,6 +7,11 @@ import {
   Button,
   Divider,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  TextField,
+  DialogTitle,
 } from "@material-ui/core";
 import { CameraAlt, Edit } from "@material-ui/icons";
 import { Row, Col } from "react-grid-system";
@@ -82,8 +87,28 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(1),
   },
   fileInput: {
-    display: 'none'
-  }
+    display: "none",
+  },
+  section: {
+    padding: `${theme.spacing(1.5)}px 0px `,
+  },
+  desc: {
+    marginBottom: theme.spacing(1),
+  },
+  avatarModal: {
+    width: 100,
+    height: 100,
+  },
+  fileInput: {
+    display: "none",
+  },
+  avatarLabel: {
+    cursor: "pointer",
+  },
+  camera: {
+    width: 50,
+    height: 50,
+  },
 }));
 
 const NFT_COLLECTION = gql`
@@ -115,9 +140,141 @@ const UPDATE_COLLECTION_COVER = gql`
   }
 `;
 
-const CollectionPage = ({alertError}) => {
+const EDIT_COLLECTION = gql`
+  mutation editNftCollection(
+    $collectionId: ID!
+    $logo: Upload!
+    $description: String
+  ) {
+    editNftCollection(
+      collectionId: $collectionId
+      logo: $logo
+      description: $description
+    )
+  }
+`;
+
+const EditDialog = ({
+  name,
+  logo,
+  description,
+  open,
+  setOpen,
+  refetch,
+  _id,
+  alertError
+}) => {
+  const classes = useStyles();
+  const [selectedLogoFile, setSelectedLogoFile] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(logo);
+  const [descriptionS, setDescription] = useState(description);
+  const [editCollection] = useMutation(EDIT_COLLECTION);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  return (
+    <Dialog
+      onClose={handleClose}
+      aria-labelledby="simple-dialog-title"
+      open={open}
+    >
+      <DialogTitle>Create Your Collection</DialogTitle>
+      <DialogContent>
+        <Typography variant="body1">
+          Configure your awesome collection.
+        </Typography>
+        <div>
+          <div className={classes.section}>
+            <Typography className={classes.desc} variant="subtitle1">
+              Feel free to change your collection logo. But remember for your
+              own good try to choose a 320x320.
+            </Typography>
+            <input
+              onChange={(e) => {
+                const file = e.target.files[0];
+                setSelectedLogoFile(file);
+                setLogoUrl(URL.createObjectURL(file));
+              }}
+              id="avatar"
+              type="file"
+              className={classes.fileInput}
+            />
+            <label className={classes.avatarLabel} htmlFor="avatar">
+              <Avatar className={classes.avatarModal} src={logoUrl} />
+            </label>
+          </div>
+          <div className={classes.section}>
+            <Typography className={classes.desc} variant="subtitle1">
+              You can not change the name of the collection.
+            </Typography>
+            <TextField
+              label="Name *"
+              variant="outlined"
+              fullWidth
+              disabled
+              color="primary"
+              value={name}
+            />
+          </div>
+          <div className={classes.section}>
+            <Typography className={classes.desc} variant="subtitle1">
+              Tell us about your cool collection.
+            </Typography>
+
+            <TextField
+              label="Description"
+              variant="outlined"
+              fullWidth
+              color="primary"
+              multiline
+              value={descriptionS}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </div>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="primary">
+          Cancel
+        </Button>
+        <Button
+          disabled={!selectedLogoFile}
+          color="primary"
+          variant="contained"
+          onClick={() => {
+            console.log('wtff??')
+            editCollection({
+              variables: {
+                collectionId: _id,
+                logo: selectedLogoFile,
+                description: descriptionS,
+              },
+            })
+              .then(() => {
+                refetch();
+                handleClose();
+              })
+              .catch((err) => {
+                alertError(
+                  "An unexpected error happened. Please try in a bit."
+                );
+              });
+          }}
+        >
+          Edit
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const CollectionPage = ({ alertError }) => {
   const classes = useStyles();
   const [coverAddress, setCoverAddress] = useState(false);
+  const [open, setOpen] = useState(false);
+
   const { _id } = useParams();
 
   const { data, loading, error, refetch } = useQuery(NFT_COLLECTION, {
@@ -171,7 +328,9 @@ const CollectionPage = ({alertError}) => {
                   })
                   .catch((err) => {
                     console.log(err);
-                    alertError('An unexpected error happened. Please try in a bit.')
+                    alertError(
+                      "An unexpected error happened. Please try in a bit."
+                    );
                   });
               }}
               id="coverInput"
@@ -179,12 +338,20 @@ const CollectionPage = ({alertError}) => {
               className={classes.fileInput}
             />
             <label className={classes.avatarLabel} htmlFor="coverInput">
-              <IconButton color="primary" component="span" className={classes.actionBtn}>
+              <IconButton
+                color="primary"
+                component="span"
+                className={classes.actionBtn}
+              >
                 <CameraAlt />
               </IconButton>
             </label>
 
-            <IconButton color="primary"  className={classes.actionBtn}>
+            <IconButton
+              onClick={() => setOpen(true)}
+              color="primary"
+              className={classes.actionBtn}
+            >
               <Edit />
             </IconButton>
           </div>
@@ -242,6 +409,17 @@ const CollectionPage = ({alertError}) => {
           </Col>
         </Row>
       </Container>
+
+      <EditDialog
+        open={open}
+        setOpen={setOpen}
+        refetch={refetch}
+        description={collection.description}
+        name={collection.name}
+        logo={avatarAddress}
+        _id={_id}
+        alertError={alertError}
+      />
     </div>
   );
 };

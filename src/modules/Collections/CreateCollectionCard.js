@@ -245,7 +245,6 @@ const CreateCollectionCard = ({ alertError }) => {
           </Button>
           <Button
             disabled={!watch().name || !selectedLogo}
-            onClick={handleClose}
             color="primary"
             variant="contained"
             onClick={() => {
