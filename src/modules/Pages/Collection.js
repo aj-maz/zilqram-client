@@ -17,8 +17,10 @@ import { CameraAlt, Edit } from "@material-ui/icons";
 import { Row, Col } from "react-grid-system";
 import { useParams } from "react-router-dom";
 import { gql, useQuery, useMutation } from "@apollo/client";
+import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
 
 import withError from "../Common/withError";
+import AddItem from "./AddItem";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -162,7 +164,7 @@ const EditDialog = ({
   setOpen,
   refetch,
   _id,
-  alertError
+  alertError,
 }) => {
   const classes = useStyles();
   const [selectedLogoFile, setSelectedLogoFile] = useState(false);
@@ -244,7 +246,7 @@ const EditDialog = ({
           color="primary"
           variant="contained"
           onClick={() => {
-            console.log('wtff??')
+            console.log("wtff??");
             editCollection({
               variables: {
                 collectionId: _id,
@@ -283,6 +285,9 @@ const CollectionPage = ({ alertError }) => {
 
   const [updateCover] = useMutation(UPDATE_COLLECTION_COVER);
 
+  const match = useRouteMatch();
+  const history = useHistory();
+
   useEffect(() => {
     if (data && data.nftCollection) {
       const collection = data.nftCollection;
@@ -308,119 +313,134 @@ const CollectionPage = ({ alertError }) => {
   const isOwner = true;
 
   return (
-    <div className={classes.root}>
-      <div className={classes.coverContainer}>
-        {coverAddress && <img src={coverAddress} className={classes.cover} />}
-        {isOwner && (
-          <div className={classes.collectionActions}>
-            <input
-              onChange={(e) => {
-                const selectedFile = e.target.files[0];
-                setCoverAddress(URL.createObjectURL(selectedFile));
-                updateCover({
-                  variables: {
-                    collectionId: _id,
-                    cover: selectedFile,
-                  },
-                })
-                  .then(() => {
-                    refetch();
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                    alertError(
-                      "An unexpected error happened. Please try in a bit."
-                    );
-                  });
-              }}
-              id="coverInput"
-              type="file"
-              className={classes.fileInput}
-            />
-            <label className={classes.avatarLabel} htmlFor="coverInput">
-              <IconButton
-                color="primary"
-                component="span"
-                className={classes.actionBtn}
-              >
-                <CameraAlt />
-              </IconButton>
-            </label>
+    <Switch>
+      <Route path={`${match.url}/add-item`}>
+        <AddItem collection={collection} />
+      </Route>
+      <Route path="/">
+        <div className={classes.root}>
+          <div className={classes.coverContainer}>
+            {coverAddress && (
+              <img src={coverAddress} className={classes.cover} />
+            )}
+            {isOwner && (
+              <div className={classes.collectionActions}>
+                <input
+                  onChange={(e) => {
+                    const selectedFile = e.target.files[0];
+                    setCoverAddress(URL.createObjectURL(selectedFile));
+                    updateCover({
+                      variables: {
+                        collectionId: _id,
+                        cover: selectedFile,
+                      },
+                    })
+                      .then(() => {
+                        refetch();
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                        alertError(
+                          "An unexpected error happened. Please try in a bit."
+                        );
+                      });
+                  }}
+                  id="coverInput"
+                  type="file"
+                  className={classes.fileInput}
+                />
+                <label className={classes.avatarLabel} htmlFor="coverInput">
+                  <IconButton
+                    color="primary"
+                    component="span"
+                    className={classes.actionBtn}
+                  >
+                    <CameraAlt />
+                  </IconButton>
+                </label>
 
-            <IconButton
-              onClick={() => setOpen(true)}
-              color="primary"
-              className={classes.actionBtn}
-            >
-              <Edit />
-            </IconButton>
-          </div>
-        )}
-      </div>
-      <Row className={classes.infoRow}>
-        <Col lg={3} md={2} sm={1} xs={0}></Col>
-        <Col lg={6} md={8} sm={10} xs={12}>
-          <div className={classes.avatarContainer}>
-            <Avatar src={avatarAddress} className={classes.avatar} />
-          </div>
-          <div className={classes.infoSection}>
-            <Typography className={classes.collectionName} variant="h4">
-              {collection.name}
-            </Typography>
-            <div className={classes.infoItems}>
-              <div className={classes.infoItem}>
-                <div className={classes.infoItemValue}>
-                  <Typography variant="h5">2</Typography>
-                </div>
-                <div className={classes.infoItemTitle}>
-                  <Typography variant="h6">Item</Typography>
-                </div>
+                <IconButton
+                  onClick={() => setOpen(true)}
+                  color="primary"
+                  className={classes.actionBtn}
+                >
+                  <Edit />
+                </IconButton>
               </div>
-              <div className={classes.infoItem}>
-                <div className={classes.infoItemValue}>
-                  <Typography variant="h5">1</Typography>
-                </div>
-                <div className={classes.infoItemTitle}>
-                  <Typography variant="h6">Owner</Typography>
-                </div>
-              </div>
-            </div>
-            <Typography variant="body1">{collection.description}</Typography>
+            )}
           </div>
-        </Col>
-      </Row>
+          <Row className={classes.infoRow}>
+            <Col lg={3} md={2} sm={1} xs={0}></Col>
+            <Col lg={6} md={8} sm={10} xs={12}>
+              <div className={classes.avatarContainer}>
+                <Avatar src={avatarAddress} className={classes.avatar} />
+              </div>
+              <div className={classes.infoSection}>
+                <Typography className={classes.collectionName} variant="h4">
+                  {collection.name}
+                </Typography>
+                <div className={classes.infoItems}>
+                  <div className={classes.infoItem}>
+                    <div className={classes.infoItemValue}>
+                      <Typography variant="h5">2</Typography>
+                    </div>
+                    <div className={classes.infoItemTitle}>
+                      <Typography variant="h6">Item</Typography>
+                    </div>
+                  </div>
+                  <div className={classes.infoItem}>
+                    <div className={classes.infoItemValue}>
+                      <Typography variant="h5">1</Typography>
+                    </div>
+                    <div className={classes.infoItemTitle}>
+                      <Typography variant="h6">Owner</Typography>
+                    </div>
+                  </div>
+                </div>
+                <Typography variant="body1">
+                  {collection.description}
+                </Typography>
+              </div>
+            </Col>
+          </Row>
 
-      <Container>
-        <Row className={classes.row}>
-          <Col md={12}>
-            <Typography className={classes.sectionTitle} variant="h5">
-              Items
-            </Typography>
-            <Button varaint="text" color="primary">
-              Add New Item
-            </Button>
-          </Col>
-        </Row>
-        <Divider className={classes.divider} />
+          <Container>
+            <Row className={classes.row}>
+              <Col md={12}>
+                <Typography className={classes.sectionTitle} variant="h5">
+                  Items
+                </Typography>
+                <Button
+                  onClick={() => history.push(`${match.url}/add-item`)}
+                  varaint="text"
+                  color="primary"
+                >
+                  Add New Item
+                </Button>
+              </Col>
+            </Row>
+            <Divider className={classes.divider} />
 
-        <Row className={classes.row}>
-          <Col md={3}>
-            <div className={classes.singleItem}>Here it is an item</div>
-          </Col>
-        </Row>
-      </Container>
+            <Row className={classes.row}>
+              <Col md={3}>
+                <div className={classes.singleItem}>Here it is an item</div>
+              </Col>
+            </Row>
+          </Container>
 
-      <EditDialog
-        open={open}
-        setOpen={setOpen}
-        refetch={refetch}
-        description={collection.description}
-        name={collection.name}
-        logo={avatarAddress}
-        _id={_id}
-        alertError={alertError}
-      />
-    </div>
+          <EditDialog
+            open={open}
+            setOpen={setOpen}
+            refetch={refetch}
+            description={collection.description}
+            name={collection.name}
+            logo={avatarAddress}
+            _id={_id}
+            alertError={alertError}
+          />
+        </div>
+      </Route>
+    </Switch>
   );
 };
 
