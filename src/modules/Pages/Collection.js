@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   makeStyles,
   IconButton,
@@ -11,7 +11,9 @@ import {
 import { CameraAlt, Edit } from "@material-ui/icons";
 import { Row, Col } from "react-grid-system";
 import { useParams } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
+
+import withError from "../Common/withError";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -79,6 +81,9 @@ const useStyles = makeStyles((theme) => ({
   row: {
     marginBottom: theme.spacing(1),
   },
+  fileInput: {
+    display: 'none'
+  }
 }));
 
 const NFT_COLLECTION = gql`
@@ -99,33 +104,51 @@ const NFT_COLLECTION = gql`
         addresses
       }
       description
+      cover
     }
   }
 `;
 
-const CollectionPage = () => {
-  const classes = useStyles();
+const UPDATE_COLLECTION_COVER = gql`
+  mutation updateNftCollectionCover($collectionId: ID!, $cover: Upload!) {
+    updateNftCollectionCover(collectionId: $collectionId, cover: $cover)
+  }
+`;
 
+const CollectionPage = ({alertError}) => {
+  const classes = useStyles();
+  const [coverAddress, setCoverAddress] = useState(false);
   const { _id } = useParams();
 
-  console.log(_id)
+  const { data, loading, error, refetch } = useQuery(NFT_COLLECTION, {
+    variables: { _id },
+  });
 
-  const { data, loading, error } = useQuery(NFT_COLLECTION, { variables: { _id } });
+  const [updateCover] = useMutation(UPDATE_COLLECTION_COVER);
 
-  if(loading) return <div>Loading</div>
+  useEffect(() => {
+    if (data && data.nftCollection) {
+      const collection = data.nftCollection;
+      if (collection.cover) {
+        setCoverAddress(
+          `${process.env.REACT_APP_FILE_URL}/${collection.cover}`
+        );
+      } else {
+        setCoverAddress(false);
+      }
+    }
+  }, [data]);
 
-  if(!data) <div>404</div>
+  if (loading) return <div>Loading</div>;
 
+  if (!data) <div>404</div>;
 
-  const collection = data.nftCollection
+  const collection = data.nftCollection;
 
-  console.log(collection)
-
-  const coverAddress = false
   const avatarAddress = `${process.env.REACT_APP_FILE_URL}/${collection.logo}`;
 
+  // TODO is owner must be implemented
   const isOwner = true;
-
 
   return (
     <div className={classes.root}>
@@ -133,10 +156,35 @@ const CollectionPage = () => {
         {coverAddress && <img src={coverAddress} className={classes.cover} />}
         {isOwner && (
           <div className={classes.collectionActions}>
-            <IconButton className={classes.actionBtn}>
-              <CameraAlt />
-            </IconButton>
-            <IconButton className={classes.actionBtn}>
+            <input
+              onChange={(e) => {
+                const selectedFile = e.target.files[0];
+                setCoverAddress(URL.createObjectURL(selectedFile));
+                updateCover({
+                  variables: {
+                    collectionId: _id,
+                    cover: selectedFile,
+                  },
+                })
+                  .then(() => {
+                    refetch();
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    alertError('An unexpected error happened. Please try in a bit.')
+                  });
+              }}
+              id="coverInput"
+              type="file"
+              className={classes.fileInput}
+            />
+            <label className={classes.avatarLabel} htmlFor="coverInput">
+              <IconButton color="primary" component="span" className={classes.actionBtn}>
+                <CameraAlt />
+              </IconButton>
+            </label>
+
+            <IconButton color="primary"  className={classes.actionBtn}>
               <Edit />
             </IconButton>
           </div>
@@ -170,9 +218,7 @@ const CollectionPage = () => {
                 </div>
               </div>
             </div>
-            <Typography variant="body1">
-              {collection.description}
-            </Typography>
+            <Typography variant="body1">{collection.description}</Typography>
           </div>
         </Col>
       </Row>
@@ -200,4 +246,4 @@ const CollectionPage = () => {
   );
 };
 
-export default CollectionPage;
+export default withError(CollectionPage);
