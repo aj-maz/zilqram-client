@@ -45,6 +45,7 @@ const ProfileActions = () => {
         color="primary"
         fullWidth
         className={classes.button}
+        onClick={() => history.push('/subscriptions')}
       >
         Manage Subscriptions
       </Button>

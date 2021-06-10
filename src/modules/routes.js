@@ -12,6 +12,7 @@ import CollectionsPage from "./Pages/Collections";
 import CollectionPage from "./Pages/Collection";
 import MessengerPage from "./Pages/Messenger";
 import NFTDetailPage from "./Pages/NFTDetail";
+import ManageSubscriptions from "./Pages/ManageSubscriptions";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -87,6 +88,11 @@ const Routes = () => {
           <Route path="/nft/:contract/:tokenId">
             <div className={classes.content}>
               <NFTDetailPage />
+            </div>
+          </Route>
+          <Route path="/subscriptions">
+            <div className={classes.content}>
+              <ManageSubscriptions />
             </div>
           </Route>
           <Route path="/">
