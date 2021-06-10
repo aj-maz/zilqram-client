@@ -11,6 +11,7 @@ import ProfilePage from "./Pages/Profile";
 import CollectionsPage from "./Pages/Collections";
 import CollectionPage from "./Pages/Collection";
 import MessengerPage from "./Pages/Messenger";
+import NFTDetailPage from "./Pages/NFTDetail";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -73,7 +74,7 @@ const Routes = () => {
             </div>
           </Route>
           <Route path="/messenger">
-              <MessengerPage loading={loading} data={data} refetch={refetch} />
+            <MessengerPage loading={loading} data={data} refetch={refetch} />
           </Route>
           <Route path="/collections">
             <div className={classes.content}>
@@ -82,6 +83,11 @@ const Routes = () => {
           </Route>
           <Route path="/collection/:_id">
             <CollectionPage />
+          </Route>
+          <Route path="/nft/:contract/:tokenId">
+            <div className={classes.content}>
+              <NFTDetailPage />
+            </div>
           </Route>
           <Route path="/">
             <div className={classes.content}>

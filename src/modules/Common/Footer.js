@@ -21,7 +21,7 @@ const Footer = () => {
   return (
     <div className={classes.root}>
       <Typography className={classes.type} variant="h6">
-        Made with love and coffee for Zilliqa Hackathon.
+        Made with passion and coffee for Zilliqa Hackathon.
       </Typography>
     </div>
   );

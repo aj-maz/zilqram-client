@@ -22,7 +22,6 @@ const useStyles = makeStyles(theme => ({
     actionContainer: {
         width: 100,
         display: "inline-block"
-
     }
 }))
 
