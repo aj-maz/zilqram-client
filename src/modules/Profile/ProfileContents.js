@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { makeStyles, AppBar, Tabs, Tab } from "@material-ui/core";
 
+import AddContent from '../Content/AddContent'
+
 const useStyles = makeStyles((theme) => ({
   root: {},
+  section: {
+    marginBottom: theme.spacing(2)
+  }
 }));
 
 const ProfileContents = () => {
@@ -10,7 +15,7 @@ const ProfileContents = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   return (
     <div className={classes.root}>
-      <div className={classes.root}>
+      <div className={classes.section}>
         <AppBar position="static">
           <Tabs
             value={selectedTab}
@@ -18,7 +23,6 @@ const ProfileContents = () => {
             variant="scrollable"
             centered
             scrollButtons="auto"
-
           >
             <Tab label="Posts" />
             <Tab label="NFTs" />
@@ -26,6 +30,9 @@ const ProfileContents = () => {
             <Tab label="Saves" />
           </Tabs>
         </AppBar>
+      </div>
+      <div className={classes.section}>
+        <AddContent />
       </div>
     </div>
   );
