@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, Avatar } from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import AccountCircle from "@material-ui/icons/AccountCircle";
+import MailIcon from "@material-ui/icons/Mail";
+import NotificationsIcon from "@material-ui/icons/Notifications";
+import Badge from "@material-ui/core/Badge";
+import { ExitToApp, Home } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 
 import { useMutation, gql, useQuery } from "@apollo/client";
@@ -22,8 +27,10 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  grow: {
+    flexGrow: 1,
+  },
 }));
-
 
 const GET_NOUNCE = gql`
   mutation getNounce($address: String!) {
@@ -75,16 +82,40 @@ const Header = ({
     if (data && data.me && zilpayConnection)
       return (
         <div>
-          <Button
-            onClick={() => {
-              localStorage.setItem("token", "");
-              client.resetStore();
-              refetch();
-            }}
-            color="inherit"
-          >
-            Logout
-          </Button>
+          <div className={classes.grow} />
+          <div>
+            <IconButton onClick={() => history.push("/")} color="inherit">
+              <Home />
+            </IconButton>
+            <IconButton onClick={() => history.push("/messenger")} color="inherit">
+              <Badge badgeContent={4} color="secondary">
+                <MailIcon />
+              </Badge>
+            </IconButton>
+            <IconButton color="inherit">
+              <Badge badgeContent={17} color="secondary">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={() => history.push("/profile")}
+            >
+              <AccountCircle />
+            </IconButton>
+            <IconButton
+              edge="end"
+              onClick={() => {
+                localStorage.setItem("token", "");
+                client.resetStore();
+                refetch();
+              }}
+              color="inherit"
+            >
+              <ExitToApp />
+            </IconButton>
+          </div>
         </div>
       );
 
@@ -140,15 +171,11 @@ const Header = ({
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
+          <Typography
+            onClick={() => history.push("/")}
+            variant="h6"
+            className={classes.title}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" className={classes.title}>
             Ziliqist
           </Typography>
           {renderOptions()}

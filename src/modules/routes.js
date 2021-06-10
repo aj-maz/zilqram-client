@@ -4,18 +4,19 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 
 import Header from "./Common/Header";
-import Footer from './Common/Footer'
+import Footer from "./Common/Footer";
 
 import HomePage from "./Pages/Home";
 import ProfilePage from "./Pages/Profile";
 import CollectionsPage from "./Pages/Collections";
 import CollectionPage from "./Pages/Collection";
+import MessengerPage from "./Pages/Messenger";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   content: {
     margin: theme.spacing(2),
-    minHeight: `calc(100vh - 134px)`
+    minHeight: `calc(100vh - 134px)`,
   },
   section: {
     marginBottom: theme.spacing(2),
@@ -71,12 +72,14 @@ const Routes = () => {
               <ProfilePage loading={loading} data={data} refetch={refetch} />
             </div>
           </Route>
+          <Route path="/messenger">
+              <MessengerPage loading={loading} data={data} refetch={refetch} />
+          </Route>
           <Route path="/collections">
             <div className={classes.content}>
               <CollectionsPage />
             </div>
           </Route>
-
           <Route path="/collection/:_id">
             <CollectionPage />
           </Route>
