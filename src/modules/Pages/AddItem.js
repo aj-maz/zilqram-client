@@ -11,6 +11,7 @@ import { ArrowLeft, AddAPhoto, Close } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 import { Container, Row, Col } from "react-grid-system";
 import { useForm, Controller } from "react-hook-form";
+import { gql, useMutation } from "@apollo/client";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -116,6 +117,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const ObjectId = (rnd = (r16) => Math.floor(r16).toString(16)) =>
+  rnd(Date.now() / 1000) +
+  " ".repeat(16).replace(/./g, () => rnd(Math.random() * 16));
+
+const CREATE_META_PROPERTY = gql`
+  mutation createMetaProperty(
+    $_id: ID!
+    $name: String!
+    $description: String
+    $external_url: String
+    $properties: String
+    $image: Upload!
+  ) {
+    createMetaProperty(
+      _id: $_id
+      name: $name
+      description: $description
+      external_url: $external_url
+      properties: $properties
+      image: $image
+    )
+  }
+`;
+
 const AddItem = ({ collection }) => {
   const classes = useStyles();
   const history = useHistory();
@@ -127,6 +152,8 @@ const AddItem = ({ collection }) => {
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [externalLink, setExternalLink] = useState("");
+
+  const [createMetaProperty] = useMutation(CREATE_META_PROPERTY);
 
   const addProperty = (prop) => {
     setProperties([...properties, prop]);
@@ -140,7 +167,7 @@ const AddItem = ({ collection }) => {
     <div className={classes.root}>
       <div className={classes.backSection}>
         <div
-          onClick={() => history.push(`/collections/${collection._id}`)}
+          onClick={() => history.push(`/collection/${collection._id}`)}
           className={classes.backAction}
         >
           <ArrowLeft />
@@ -308,13 +335,78 @@ const AddItem = ({ collection }) => {
               <Button
                 disabled={!selectedImage || !name}
                 onClick={() => {
-                    // create an Id and store it
+                  // create an Id and store it - Check
 
-                    // call mint transition
+                  // call mint transition - Check
 
-                    // create metadata mutation
+                  // create metadata mutation -
 
-                  console.log(selectedImage, description, name, properties);
+                  const nftId = ObjectId();
+
+                  const contract = window.zilPay.contracts.at(
+                    collection.contractAddress
+                  );
+
+                  contract
+                    .call(
+                      "Mint",
+                      [
+                        {
+                          vname: "to",
+                          type: "ByStr20",
+                          value: window.zilPay.wallet.defaultAccount.base16,
+                        },
+                        {
+                          vname: "token_uri",
+                          type: "String",
+                          value: `${process.env.REACT_APP_NFT_ADDRESS}/${nftId}`,
+                        },
+                      ],
+                      {
+                        gasLimit: "25000",
+                        gasPrice: "1000000000",
+                      }
+                    )
+                    .then(([tx, contract]) => {
+                      createMetaProperty({
+                        variables: {
+                          _id: nftId,
+                          name: name,
+                          description,
+                          external_url: externalLink,
+                          properties: JSON.stringify(properties),
+                          image: selectedImage,
+                        },
+                      })
+                        .then((msg) => {
+                          history.push(`/collection/${collection._id}`);
+                        })
+                        .catch((err) => console.log(err));
+                    })
+                    .catch((err) => {
+                      createMetaProperty({
+                        variables: {
+                          _id: nftId,
+                          name: name,
+                          description,
+                          external_url: externalLink,
+                          properties: JSON.stringify(properties),
+                          image: selectedImage,
+                        },
+                      })
+                        .then((msg) => {
+                          history.push(`/collection/${collection._id}`);
+                        })
+                        .catch((err) => console.log(err));
+                    });
+
+                  console.log(
+                    selectedImage,
+                    description,
+                    name,
+                    properties,
+                    collection
+                  );
                 }}
                 variant="contained"
                 color="primary"

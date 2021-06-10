@@ -131,6 +131,7 @@ const NFT_COLLECTION = gql`
         addresses
       }
       description
+      contractAddress
       cover
     }
   }
