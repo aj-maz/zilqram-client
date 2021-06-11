@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles, Typography, Paper } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,11 +33,44 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NFTCard = ({ image, name, _id }) => {
+const NFTCard = ({ token_uri, collection, tokenId }) => {
   const classes = useStyles();
   const history = useHistory();
+  const [loading, setLoading] = useState(true);
+  const [image, setImage] = useState("");
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    axios
+      .get(token_uri)
+      .then(function ({ data }) {
+        // handle success
+        setImage(data.image);
+        setName(data.name);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  if (loading)
+    return (
+      <Typography
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        Loading ...
+      </Typography>
+    );
+
   return (
-    <Paper onClick={() => {}} className={classes.root}>
+    <Paper onClick={() => {
+      history.push(`/nft/${collection._id}/${tokenId}`)
+    }} className={classes.root}>
       <div className={classes.container}>
         <div className={classes.imageContainer}>
           <img src={image} className={classes.image} />

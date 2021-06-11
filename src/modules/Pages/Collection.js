@@ -21,6 +21,7 @@ import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
 
 import withError from "../Common/withError";
 import AddItem from "./AddItem";
+import NFTCard from "../NFT/NFTCard";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -277,8 +278,9 @@ const CollectionPage = ({ alertError }) => {
   const classes = useStyles();
   const [coverAddress, setCoverAddress] = useState(false);
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState("Loading");
-  const [tokenOwners, setTokenOwners] = useState("Loading");
+  const [items, setItems] = useState("...");
+  const [tokenOwners, setTokenOwners] = useState("...");
+  const [tokenUris, setTokenUris] = useState([]);
 
   const { _id } = useParams();
 
@@ -308,6 +310,9 @@ const CollectionPage = ({ alertError }) => {
           setItems(contractState.total_supply);
           let a = new Set(Object.values(contractState.token_owners));
           setTokenOwners(a.size);
+          setTokenUris(Object.values(contractState.token_uris));
+
+          console.log(contractState);
         });
       }
     }
@@ -434,9 +439,23 @@ const CollectionPage = ({ alertError }) => {
             <Divider className={classes.divider} />
 
             <Row className={classes.row}>
-              <Col md={3}>
-                <div className={classes.singleItem}>Here it is an item</div>
-              </Col>
+              {tokenUris.length === 0 ? (
+                <Col xs={12}>
+                  <div className={classes.singleItem}>
+                    <Typography variant=""></Typography> There is no token yet
+                  </div>
+                </Col>
+              ) : (
+                tokenUris.map((uri, index) => (
+                  <Col lg={3} md={4} sm={6} xs={12}>
+                    <NFTCard
+                      token_uri={uri}
+                      collection={collection}
+                      tokenId={index + 1}
+                    />
+                  </Col>
+                ))
+              )}
             </Row>
           </Container>
 
