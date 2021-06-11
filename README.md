@@ -4,6 +4,6 @@
 
 # In my humble oponion it's a cool project and worth a bit of waiting
 
-![alt text](https://ibb.co/Y0cWJY2)
-![alt text](https://ibb.co/xJtNCsw)
-![alt text](https://ibb.co/6WcmHFj)
+![alt text](https://i.ibb.co/phfPNG2/Screenshot-from-2021-06-11-14-17-31.png)
+![alt text](https://i.ibb.co/hDJS7Mr/Screenshot-from-2021-06-11-14-17-07.png)
+![alt text](https://i.ibb.co/x7KD16x/Screenshot-from-2021-06-11-14-16-38.png)
