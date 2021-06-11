@@ -44,7 +44,6 @@ const NFTCard = ({ token_uri, collection, tokenId }) => {
     axios
       .get(token_uri)
       .then(function ({ data }) {
-        // handle success
         setImage(data.image);
         setName(data.name);
         setLoading(false);

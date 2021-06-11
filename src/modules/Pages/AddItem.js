@@ -390,7 +390,12 @@ const AddItem = ({ collection }) => {
                           name: name,
                           description,
                           external_url: externalLink,
-                          properties: JSON.stringify(properties),
+                          properties: JSON.stringify(
+                            properties.map((prop) => ({
+                              value: prop.value,
+                              trait_type: prop.traitType,
+                            }))
+                          ),
                           image: selectedImage,
                         },
                       })

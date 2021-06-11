@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   makeStyles,
   Typography,
@@ -12,6 +12,9 @@ import {
 } from "@material-ui/core";
 import { Refresh, Share, MoreVert } from "@material-ui/icons";
 import { Row, Col, Container } from "react-grid-system";
+import { useParams, useHistory } from "react-router-dom";
+import { gql, useQuery } from "@apollo/client";
+import axios from "axios";
 
 import ContentActions from "../Content/ContentActions";
 import ContentMeta from "../Content/ContentMeta";
@@ -101,31 +104,91 @@ const useStyles = makeStyles((theme) => ({
   },
   moreOfThis: {
     marginTop: theme.spacing(3),
-    position: 'relative'
+    position: "relative",
   },
   moreOfThisTitle: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
   },
   viewColBtn: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
-    right: 0
-  }
+    right: 0,
+  },
 }));
+
+const NFT_COLLECTION = gql`
+  query nftCollection($_id: ID!) {
+    nftCollection(_id: $_id) {
+      _id
+      name
+      logo
+      creator {
+        _id
+        username
+        displayName
+        avatar
+        bio
+        setted
+        createdAt
+        updatedAt
+        addresses
+      }
+      description
+      contractAddress
+      cover
+    }
+  }
+`;
 
 const NFTDetailPage = () => {
   const classes = useStyles();
-
+  const { contractId, tokenId } = useParams();
   const [selectedTab, setSelectedTab] = useState(0);
+  const [currentToken, setCurrentToken] = useState(null);
+  const [tokenUris, setTokenUris] = useState(null);
+  const history = useHistory();
 
-  const properties = [
-    { traitType: "Hello", value: "WoooBooLublub" },
-    { traitType: "Hello", value: "WoooBooLublub" },
-    { traitType: "Hello", value: "WoooBooLublub" },
-    { traitType: "Hello", value: "WoooBooLublub" },
-    { traitType: "Hello", value: "WoooBooLublub" },
-    { traitType: "Hello", value: "WoooBooLublub" },
-  ];
+  const { data, loading, error, refetch } = useQuery(NFT_COLLECTION, {
+    variables: { _id: contractId },
+  });
+
+  useEffect(() => {
+    if (data && data.nftCollection) {
+      const collection = data.nftCollection;
+      if (collection.contractAddress) {
+        const contract = window.zilPay.contracts.at(collection.contractAddress);
+
+        contract.getState().then((contractState) => {
+          setTokenUris(
+            Object.values(contractState.token_uris)
+              .map((item, index) => ({ uri: item, id: index + 1 }))
+              .filter((item, index) => {
+                return item.id !== Number(tokenId);
+              })
+              .slice(0, 4)
+          );
+
+          const currTokenUri = contractState.token_uris[tokenId];
+          if (currTokenUri) {
+            axios
+              .get(currTokenUri)
+              .then(function ({ data }) {
+                // handle success
+                setCurrentToken(data);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        });
+      }
+    }
+  }, [data, contractId, tokenId]);
+
+  if (loading || !currentToken)
+    return <Typography variant="h4">Loading ...</Typography>;
+
+  const properties = currentToken.properties;
 
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -137,18 +200,7 @@ const NFTDetailPage = () => {
       case 0:
         return (
           <div>
-            <Typography variant="body1">
-              It is a long established fact that a reader will be distracted by
-              the readable content of a page when looking at its layout. The
-              point of using Lorem Ipsum is that it has a more-or-less normal
-              distribution of letters, as opposed to using 'Content here,
-              content here', making it look like readable English. Many desktop
-              publishing packages and web page editors now use Lorem Ipsum as
-              their default model text, and a search for 'lorem ipsum' will
-              uncover many web sites still in their infancy. Various versions
-              have evolved over the years, sometimes by accident, sometimes on
-              purpose (injected humour and the like).
-            </Typography>
+            <Typography variant="body1">{currentToken.description}</Typography>
             <Row>
               {properties.map((prop, index) => (
                 <Col
@@ -171,22 +223,13 @@ const NFTDetailPage = () => {
         return (
           <div className={classes.collectionCont}>
             <Avatar
-              src="/images/sample1.png"
+              src={`${process.env.REACT_APP_FILE_URL}/${data.nftCollection.logo}`}
               className={classes.collectionAvatar}
             />
             <div className={classes.collectionInfoCon}>
-              <Typography variant="h5">Collection Name</Typography>
+              <Typography variant="h5">{data.nftCollection.name}</Typography>
               <Typography className={classes.collectionDesc} variant="body1">
-                It is a long established fact that a reader will be distracted
-                by the readable content of a page when looking at its layout.
-                The point of using Lorem Ipsum is that it has a more-or-less
-                normal distribution of letters, as opposed to using 'Content
-                here, content here', making it look like readable English. Many
-                desktop publishing packages and web page editors now use Lorem
-                Ipsum as their default model text, and a search for 'lorem
-                ipsum' will uncover many web sites still in their infancy.
-                Various versions have evolved over the years, sometimes by
-                accident, sometimes on purpose (injected humour and the like).
+                {data.nftCollection.description}
               </Typography>
             </div>
           </div>
@@ -199,9 +242,13 @@ const NFTDetailPage = () => {
                 <Typography variant="h6">Contract Address</Typography>
               </div>
               <div className={classes.detailValue}>
-                <a target="_blank" style={{ textDecoration: "none" }} href="/#">
+                <a
+                  target="_blank"
+                  style={{ textDecoration: "none" }}
+                  href={`https://viewblock.io/zilliqa/address/${data.nftCollection.contractAddress}?network=testnet`}
+                >
                   <Typography className={classes.contractLink} variant="h6">
-                    21391238
+                    {data.nftCollection.contractAddress.substring(0, 15)}...
                   </Typography>
                 </a>
               </div>
@@ -212,7 +259,7 @@ const NFTDetailPage = () => {
               </div>
               <div className={classes.detailValue}>
                 <Typography className={classes.contractLink} variant="h6">
-                  #12
+                  #{tokenId}
                 </Typography>
               </div>
             </div>
@@ -238,7 +285,7 @@ const NFTDetailPage = () => {
         <Col md={6} lg={5}>
           <div className={classes.nftCard}>
             <ContentMeta>
-              <ContentPicture src="/images/sample1.png" />
+              <ContentPicture src={currentToken.image} />
               <ContentActions />
               <ContentLikedBy likes={12} />
               <ContentComments />
@@ -247,10 +294,10 @@ const NFTDetailPage = () => {
         </Col>
         <Col md={6} lg={7}>
           <Typography variant="body2" className={classes.collectionName}>
-            CollectionName
+            {data.nftCollection.name}
           </Typography>
           <Typography variant="h4" className={classes.tokenName}>
-            Token Name - #12
+            {currentToken.name} - #{tokenId}
           </Typography>
           <div className={classes.metaInfoContainer}>
             <div className={classes.metaInfoItem}>
@@ -262,14 +309,14 @@ const NFTDetailPage = () => {
               <Typography variant="body1">Views: 23</Typography>
             </div>
           </div>
-          <Paper className={classes.pricingContainer}>
+          {/*<Paper className={classes.pricingContainer}>
             <Typography className={classes.pricingTitle} variant="h6">
               Current Price: 53 $ZIL ({formatter.format(53 * zillPrice)})
             </Typography>
             <Button variant="contained" color="secondary">
               Buy Now
             </Button>
-          </Paper>
+  </Paper>*/}
 
           <div className={classes.additionalInfo}>
             <AppBar className={classes.additionalInfoTabs} position="static">
@@ -286,39 +333,29 @@ const NFTDetailPage = () => {
             {renderAdditionalInfo()}
           </div>
           <div className={classes.moreOfThis}>
-            <Typography className={classes.moreOfThisTitle} variant="h5">More from this collection</Typography>
-            <Button className={classes.viewColBtn} variant="text" color="primary" >View Collection</Button>
+            <Typography className={classes.moreOfThisTitle} variant="h5">
+              More from this collection
+            </Typography>
+            <Button
+              className={classes.viewColBtn}
+              variant="text"
+              color="primary"
+              onClick={() =>
+                history.push(`/collection/${data.nftCollection._id}`)
+              }
+            >
+              View Collection
+            </Button>
             <Row>
-              <Col md={6}>
-                <NFTCard
-                  image={`/images/sample1.png`}
-                  name={"Collectors Patch"}
-                  _id={"123123"}
-                />
-              </Col>
-              <Col md={6}>
-                <NFTCard
-                  image={`/images/sample1.png`}
-                  name={"Collectors Patch"}
-                  _id={"123123"}
-                />
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <NFTCard
-                  image={`/images/sample1.png`}
-                  name={"Collectors Patch"}
-                  _id={"123123"}
-                />
-              </Col>
-              <Col md={6}>
-                <NFTCard
-                  image={`/images/sample1.png`}
-                  name={"Collectors Patch"}
-                  _id={"123123"}
-                />
-              </Col>
+              {tokenUris.map((token) => (
+                <Col key={token.id} md={6}>
+                  <NFTCard
+                    token_uri={token.uri}
+                    collection={data.nftCollection}
+                    tokenId={token.id}
+                  />
+                </Col>
+              ))}
             </Row>
           </div>
         </Col>

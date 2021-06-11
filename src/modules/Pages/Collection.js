@@ -356,7 +356,6 @@ const CollectionPage = ({ alertError }) => {
                         refetch();
                       })
                       .catch((err) => {
-                        console.log(err);
                         alertError(
                           "An unexpected error happened. Please try in a bit."
                         );
@@ -447,7 +446,7 @@ const CollectionPage = ({ alertError }) => {
                 </Col>
               ) : (
                 tokenUris.map((uri, index) => (
-                  <Col lg={3} md={4} sm={6} xs={12}>
+                  <Col key={index} lg={3} md={4} sm={6} xs={12}>
                     <NFTCard
                       token_uri={uri}
                       collection={collection}

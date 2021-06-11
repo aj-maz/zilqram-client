@@ -85,7 +85,7 @@ const Routes = () => {
           <Route path="/collection/:_id">
             <CollectionPage />
           </Route>
-          <Route path="/nft/:contract/:tokenId">
+          <Route path="/nft/:contractId/:tokenId">
             <div className={classes.content}>
               <NFTDetailPage />
             </div>
