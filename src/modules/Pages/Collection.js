@@ -277,6 +277,8 @@ const CollectionPage = ({ alertError }) => {
   const classes = useStyles();
   const [coverAddress, setCoverAddress] = useState(false);
   const [open, setOpen] = useState(false);
+  const [items, setItems] = useState("Loading");
+  const [tokenOwners, setTokenOwners] = useState("Loading");
 
   const { _id } = useParams();
 
@@ -298,6 +300,15 @@ const CollectionPage = ({ alertError }) => {
         );
       } else {
         setCoverAddress(false);
+      }
+      if (collection.contractAddress) {
+        const contract = window.zilPay.contracts.at(collection.contractAddress);
+
+        contract.getState().then((contractState) => {
+          setItems(contractState.total_supply);
+          let a = new Set(Object.values(contractState.token_owners));
+          setTokenOwners(a.size);
+        });
       }
     }
   }, [data]);
@@ -383,7 +394,7 @@ const CollectionPage = ({ alertError }) => {
                 <div className={classes.infoItems}>
                   <div className={classes.infoItem}>
                     <div className={classes.infoItemValue}>
-                      <Typography variant="h5">2</Typography>
+                      <Typography variant="h5">{items}</Typography>
                     </div>
                     <div className={classes.infoItemTitle}>
                       <Typography variant="h6">Item</Typography>
@@ -391,7 +402,7 @@ const CollectionPage = ({ alertError }) => {
                   </div>
                   <div className={classes.infoItem}>
                     <div className={classes.infoItemValue}>
-                      <Typography variant="h5">1</Typography>
+                      <Typography variant="h5">{tokenOwners}</Typography>
                     </div>
                     <div className={classes.infoItemTitle}>
                       <Typography variant="h6">Owner</Typography>
