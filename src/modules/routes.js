@@ -50,7 +50,7 @@ const Routes = () => {
   const { client, data, loading, error, refetch } = useQuery(ME);
 
   useEffect(() => {
-    if (!zilpayConnection) {
+    if (!zilpayConnection &&window.zilPay) {
       window.zilPay.wallet.connect().then(() => {
         setZilpayConenction(true);
       });
