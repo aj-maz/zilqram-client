@@ -37,7 +37,8 @@ const ME = gql`
       createdAt
       updatedAt
       addresses
-      nounce
+      followers
+      followings
     }
   }
 `;
@@ -74,6 +75,11 @@ const Routes = () => {
               <ProfilePage loading={loading} data={data} refetch={refetch} />
             </div>
           </Route>
+          <Route path="/user/:userId">
+            <div className={classes.content}>
+              <ProfilePage loading={loading} data={data} refetch={refetch} />
+            </div>
+          </Route>
           <Route path="/messenger">
             <MessengerPage loading={loading} data={data} refetch={refetch} />
           </Route>
@@ -83,11 +89,11 @@ const Routes = () => {
             </div>
           </Route>
           <Route path="/collection/:_id">
-            <CollectionPage />
+            <CollectionPage me={data && data.me ? data.me : {}} />
           </Route>
           <Route path="/nft/:contractId/:tokenId">
             <div className={classes.content}>
-              <NFTDetailPage />
+              <NFTDetailPage me={data && data.me ? data.me : {}} />
             </div>
           </Route>
           <Route path="/subscriptions">
@@ -97,7 +103,7 @@ const Routes = () => {
           </Route>
           <Route path="/">
             <div className={classes.content}>
-              <HomePage />
+              <HomePage me={data && data.me ? data.me : {}} />
             </div>
           </Route>
         </Switch>

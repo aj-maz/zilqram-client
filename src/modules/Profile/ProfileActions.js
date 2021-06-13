@@ -1,6 +1,6 @@
 import React from "react";
 import { makeStyles, Button } from "@material-ui/core";
-import { useHistory } from 'react-router-dom'
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ProfileActions = () => {
   const classes = useStyles();
-  const history = useHistory()
+  const history = useHistory();
 
   return (
     <div className={classes.root}>
@@ -28,24 +28,24 @@ const ProfileActions = () => {
         color="secondary"
         fullWidth
         className={classes.button}
-        onClick={() => history.push('/collections')}
+        onClick={() => history.push("/collections")}
       >
         Mint a NFT
       </Button>
-      <Button
+      {/*    <Button
         variant="outlined"
         color="primary"
         fullWidth
         className={classes.button}
       >
         Create Collection
-      </Button>
+      </Button>*/}
       <Button
         variant="text"
         color="primary"
         fullWidth
         className={classes.button}
-        onClick={() => history.push('/subscriptions')}
+        onClick={() => history.push("/subscriptions")}
       >
         Manage Subscriptions
       </Button>

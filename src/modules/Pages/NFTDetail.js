@@ -13,7 +13,7 @@ import {
 import { Refresh, Share, MoreVert } from "@material-ui/icons";
 import { Row, Col, Container } from "react-grid-system";
 import { useParams, useHistory } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import axios from "axios";
 
 import ContentActions from "../Content/ContentActions";
@@ -23,9 +23,11 @@ import ContentPicture from "../Content/ContentPicture";
 import ContentHeader from "../Content/ContentHeader";
 import ContentComments from "../Content/ContentComments";
 
+import { Zilliqa } from "@zilliqa-js/zilliqa";
+
 import NFTCard from "../NFT/NFTCard";
 
-//TODO zill price must be getted from an api
+const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
 const zillPrice = 0.1112;
 
@@ -140,23 +142,29 @@ const NFT_COLLECTION = gql`
   }
 `;
 
-const NFTDetailPage = () => {
+const NFTDetailPage = ({ me }) => {
   const classes = useStyles();
   const { contractId, tokenId } = useParams();
   const [selectedTab, setSelectedTab] = useState(0);
   const [currentToken, setCurrentToken] = useState(null);
+  const [currentTokenUri, setCurrentTokenUri] = useState(null);
   const [tokenUris, setTokenUris] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(0);
   const history = useHistory();
 
   const { data, loading, error, refetch } = useQuery(NFT_COLLECTION, {
     variables: { _id: contractId },
   });
 
+  console.log(data);
+
+  console.log(me);
+
   useEffect(() => {
     if (data && data.nftCollection) {
       const collection = data.nftCollection;
       if (collection.contractAddress) {
-        const contract = window.zilPay.contracts.at(collection.contractAddress);
+        const contract = zilliqa.contracts.at(collection.contractAddress);
 
         contract.getState().then((contractState) => {
           setTokenUris(
@@ -169,6 +177,7 @@ const NFTDetailPage = () => {
           );
 
           const currTokenUri = contractState.token_uris[tokenId];
+          setCurrentTokenUri(currTokenUri);
           if (currTokenUri) {
             axios
               .get(currTokenUri)
@@ -185,6 +194,20 @@ const NFTDetailPage = () => {
     }
   }, [data, contractId, tokenId]);
 
+  useEffect(() => {
+    if (currentTokenUri) {
+      axios
+        .get(currentTokenUri)
+        .then(function ({ data }) {
+          // handle success
+          setCurrentToken(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [refreshToken, currentTokenUri]);
+
   if (loading || !currentToken)
     return <Typography variant="h4">Loading ...</Typography>;
 
@@ -194,6 +217,10 @@ const NFTDetailPage = () => {
     style: "currency",
     currency: "USD",
   });
+
+  const refresh = () => {
+    setRefreshToken(refreshToken + 1);
+  };
 
   const renderAdditionalInfo = () => {
     switch (selectedTab) {
@@ -211,7 +238,7 @@ const NFTDetailPage = () => {
                   sm={6}
                 >
                   <div className={classes.propContainer}>
-                    <Typography variant="body1">{prop.traitType}</Typography>
+                    <Typography variant="body1">{prop.trait_type}</Typography>
                     <Typography variant="body2">{prop.value}</Typography>
                   </div>
                 </Col>
@@ -271,7 +298,7 @@ const NFTDetailPage = () => {
   return (
     <Container className={classes.root}>
       <div className={classes.actionMenu}>
-        <IconButton className={classes.actionBtn}>
+        <IconButton onClick={() => refresh()} className={classes.actionBtn}>
           <Refresh />
         </IconButton>
         <IconButton className={classes.actionBtn}>
@@ -286,9 +313,13 @@ const NFTDetailPage = () => {
           <div className={classes.nftCard}>
             <ContentMeta>
               <ContentPicture src={currentToken.image} />
-              <ContentActions />
-              <ContentLikedBy likes={12} />
-              <ContentComments />
+              <ContentActions
+                id={currentToken._id}
+                liked={currentToken.likers ? currentToken.likers.includes(me._id) : false}
+                likes={currentToken.likes ? currentToken.likes : []}
+                refetch={refresh}
+                nft
+              />
             </ContentMeta>
           </div>
         </Col>
@@ -306,7 +337,9 @@ const NFTDetailPage = () => {
               </Typography>
             </div>
             <div className={classes.metaInfoItem}>
-              <Typography variant="body1">Views: 23</Typography>
+              <Typography variant="body1">
+                Views: {currentToken.views}
+              </Typography>
             </div>
           </div>
           {/*<Paper className={classes.pricingContainer}>

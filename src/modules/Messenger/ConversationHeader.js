@@ -40,7 +40,7 @@ const ConversationHeader = () => {
   return (
     <div className={classes.root}>
       <div className={classes.leftContainer}>
-        <Avatar className={classes.avatar} src="/images/sample1.png" />
+        <Avatar className={classes.avatar} src="/images/pp.jpeg" />
         <div className={classes.infoContainer}>
           <Typography className={classes.title} variant="h6">
             Ajand Mardalizad

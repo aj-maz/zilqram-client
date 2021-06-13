@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, Typography } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -10,16 +10,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ContentPicture = ({ src, image }) => {
+const ContentZweet = ({ body }) => {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      <img
-        src={image ? `${process.env.REACT_APP_FILE_URL}/${image}` : src}
-        className={classes.image}
-      />
+      <Typography variant="body1">{body}</Typography>
     </div>
   );
 };
 
-export default ContentPicture;
+export default ContentZweet;

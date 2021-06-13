@@ -18,10 +18,13 @@ import { Row, Col } from "react-grid-system";
 import { useParams } from "react-router-dom";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 
 import withError from "../Common/withError";
 import AddItem from "./AddItem";
 import NFTCard from "../NFT/NFTCard";
+
+const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -274,13 +277,14 @@ const EditDialog = ({
   );
 };
 
-const CollectionPage = ({ alertError }) => {
+const CollectionPage = ({ alertError, me }) => {
   const classes = useStyles();
   const [coverAddress, setCoverAddress] = useState(false);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState("...");
   const [tokenOwners, setTokenOwners] = useState("...");
   const [tokenUris, setTokenUris] = useState([]);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const { _id } = useParams();
 
@@ -304,19 +308,21 @@ const CollectionPage = ({ alertError }) => {
         setCoverAddress(false);
       }
       if (collection.contractAddress) {
-        const contract = window.zilPay.contracts.at(collection.contractAddress);
+        const contract = zilliqa.contracts.at(collection.contractAddress);
 
         contract.getState().then((contractState) => {
-          setItems(contractState.total_supply);
-          let a = new Set(Object.values(contractState.token_owners));
-          setTokenOwners(a.size);
-          setTokenUris(Object.values(contractState.token_uris));
-
-          console.log(contractState);
+          if (contractState) {
+            setItems(contractState.total_supply);
+            let a = new Set(Object.values(contractState.token_owners));
+            setTokenOwners(a.size);
+            setTokenUris(Object.values(contractState.token_uris));
+          } else {
+            setRefreshToken(refreshToken + 1);
+          }
         });
       }
     }
-  }, [data]);
+  }, [data, refreshToken]);
 
   if (loading) return <div>Loading</div>;
 
@@ -426,13 +432,15 @@ const CollectionPage = ({ alertError }) => {
                 <Typography className={classes.sectionTitle} variant="h5">
                   Items
                 </Typography>
-                <Button
-                  onClick={() => history.push(`${match.url}/add-item`)}
-                  varaint="text"
-                  color="primary"
-                >
-                  Add New Item
-                </Button>
+                {me && me._id == collection.owner._id && (
+                  <Button
+                    onClick={() => history.push(`${match.url}/add-item`)}
+                    varaint="text"
+                    color="primary"
+                  >
+                    Add New Item
+                  </Button>
+                )}
               </Col>
             </Row>
             <Divider className={classes.divider} />

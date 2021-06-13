@@ -10,10 +10,11 @@ import {
   FormControlLabel,
   TextField,
   Button,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import { Row, Col } from "react-grid-system";
-import { AddAPhoto } from '@material-ui/icons'
+import { AddAPhoto } from "@material-ui/icons";
+import { gql, useMutation } from "@apollo/client";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,15 +58,43 @@ const useStyles = makeStyles((theme) => ({
     color: "#8f8f8f",
   },
   imageInputContainer: {
-    textAlign: 'center'
-  }
+    textAlign: "center",
+  },
 }));
 
-const AddContent = () => {
+const CREATE_CONTENT = gql`
+  mutation createContent(
+    $variant: String!
+    $body: String!
+    $image: Upload
+    $exclusive: Boolean!
+  ) {
+    createContent(
+      variant: $variant
+      body: $body
+      image: $image
+      exclusive: $exclusive
+    ) {
+      _id
+    }
+  }
+`;
+
+const AddContent = ({ refetch }) => {
   const classes = useStyles();
   const [selectedImage, setSelectedImage] = useState(null);
   const [contentType, setContentType] = useState("zweet");
   const [exclusive, setExclusive] = useState(false);
+  const [body, setBody] = useState("");
+
+  const [createContent] = useMutation(CREATE_CONTENT);
+
+  const reset = () => {
+    setContentType("zweet");
+    setExclusive(false);
+    setSelectedImage(null);
+    setBody("");
+  };
 
   const handleChange = (event) => {
     setContentType(event.target.value);
@@ -76,7 +105,14 @@ const AddContent = () => {
       case "zweet":
         return (
           <div>
-            <TextField variant="outlined" label="Zweet" fullWidth multiline />
+            <TextField
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              variant="outlined"
+              label="Zweet"
+              fullWidth
+              multiline
+            />
           </div>
         );
       case "photo":
@@ -165,7 +201,24 @@ const AddContent = () => {
       <Row>
         <Col md={3} sm={0}></Col>
         <Col md={6} sm={12}>
-          <Button fullWidth variant="contained" color="primary">
+          <Button
+            onClick={() => {
+              createContent({
+                variables: {
+                  variant: contentType,
+                  body,
+                  image: selectedImage,
+                  exclusive,
+                },
+              }).then(() => {
+                refetch();
+                reset();
+              });
+            }}
+            fullWidth
+            variant="contained"
+            color="primary"
+          >
             Post
           </Button>
         </Col>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   makeStyles,
   Avatar,
@@ -7,6 +7,8 @@ import {
   TextField,
   Button,
 } from "@material-ui/core";
+import { useHistory } from 'react-router-dom'
+import { gql, useQuery, useMutation } from "@apollo/client";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -41,84 +43,92 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ContentComments = () => {
+const COMMENTS = gql`
+  query comments($belongsTo: ID!) {
+    comments(belongsTo: $belongsTo) {
+      _id
+      body
+      createdAt
+      owner {
+        _id
+        avatar
+        displayName
+      }
+    }
+  }
+`;
+
+const CREATE_COMMENT = gql`
+  mutation createComment($body: String!, $belongsTo: ID!) {
+    createComment(body: $body, belongsTo: $belongsTo) {
+      _id
+    }
+  }
+`;
+
+const ContentComments = ({ id }) => {
   const classes = useStyles();
+  const [body, setBody] = useState("");
+  const [createCommnet] = useMutation(CREATE_COMMENT);
+
+  const history = useHistory()
+
+  const { data, loading, error, refetch } = useQuery(COMMENTS, {
+    variables: { belongsTo: id },
+  });
+
+  if (!data) return <Typography variant="h6">Loading ...</Typography>;
+
   return (
     <div className={classes.root}>
       <div className={classes.comments}>
-        <Divider />
-        <div className={classes.commentContainer}>
-          <Avatar
-            src={"/images/sample1.png"}
-            className={classes.commentAuthorAvatar}
-          />
-          <div className={classes.commentContent}>
-            <Typography variant="body1">Dorsa Hosseini</Typography>
-            <Typography variant="body2">
-              glish. Many desktop publishing packages and web page editors now
-              use Lorem Ipsum as their default model text, and a search for
-              'lorem ipsum' will uncover many web sites still in their infancy.
-              Various versions
-            </Typography>
+        {data.comments.map((comment) => (
+          <div key={comment._id}>
+            <Divider />
+            <div key={comment._id} className={classes.commentContainer}>
+              <Avatar
+                src={`${process.env.REACT_APP_FILE_URL}/${comment.owner.avatar}`}
+                className={classes.commentAuthorAvatar}
+              />
+              <div className={classes.commentContent}>
+                <Typography onClick={() => history.push(`/user/${comment.owner._id}`)} style={{cursor: 'pointer'}} variant="body1">
+                  {comment.owner.displayName}
+                </Typography>
+                <Typography variant="body2">
+                  {comment.body}
+                </Typography>
+              </div>
+            </div>
           </div>
-        </div>
-        <Divider />
-        <div className={classes.commentContainer}>
-          <Avatar
-            src={"/images/sample1.png"}
-            className={classes.commentAuthorAvatar}
-          />
-          <div className={classes.commentContent}>
-            <Typography variant="body1">Dorsa Hosseini</Typography>
-            <Typography variant="body2">
-              glish. Many desktop publishing packages and web page editors now
-              use Lorem Ipsum as their default model text, and a search for
-              'lorem ipsum' will uncover many web sites still in their infancy.
-              Various versions
-            </Typography>
-          </div>
-        </div>
-        <Divider />
-        <div className={classes.commentContainer}>
-          <Avatar
-            src={"/images/sample1.png"}
-            className={classes.commentAuthorAvatar}
-          />
-          <div className={classes.commentContent}>
-            <Typography variant="body1">Dorsa Hosseini</Typography>
-            <Typography variant="body2">
-              glish. Many desktop publishing packages and web page editors now
-              use Lorem Ipsum as their default model text, and a search for
-              'lorem ipsum' will uncover many web sites still in their infancy.
-              Various versions
-            </Typography>
-          </div>
-        </div>
-        <Divider />
-        <div className={classes.commentContainer}>
-          <Avatar
-            src={"/images/sample1.png"}
-            className={classes.commentAuthorAvatar}
-          />
-          <div className={classes.commentContent}>
-            <Typography variant="body1">Dorsa Hosseini</Typography>
-            <Typography variant="body2">
-              glish. Many desktop publishing packages and web page editors now
-              use Lorem Ipsum as their default model text, and a search for
-              'lorem ipsum' will uncover many web sites still in their infancy.
-              Various versions
-            </Typography>
-          </div>
-        </div>
+        ))}
       </div>
       <Divider />
 
       <div className={classes.commentInput}>
         <div className={classes.filedContainer}>
-          <TextField variant="filled" multiline label="Comment" fullWidth />
+          <TextField
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            variant="filled"
+            multiline
+            label="Comment"
+            fullWidth
+          />
         </div>
         <div className={classes.actionContainer}>
-          <Button fullWidth color="primary">
+          <Button
+            onClick={() => {
+              createCommnet({
+                variables: { body, belongsTo: id },
+              }).then(() => {
+                refetch();
+                setBody("");
+              });
+            }}
+            disabled={!body}
+            fullWidth
+            color="primary"
+          >
             Send
           </Button>
         </div>

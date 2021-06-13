@@ -110,6 +110,7 @@ const Header = ({
                 localStorage.setItem("token", "");
                 client.resetStore();
                 refetch();
+                history.push('/')
               }}
               color="inherit"
             >
