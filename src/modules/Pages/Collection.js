@@ -432,7 +432,7 @@ const CollectionPage = ({ alertError, me }) => {
                 <Typography className={classes.sectionTitle} variant="h5">
                   Items
                 </Typography>
-                {me && me._id == collection.owner._id && (
+                {me && me._id == collection.creator._id && (
                   <Button
                     onClick={() => history.push(`${match.url}/add-item`)}
                     varaint="text"
