@@ -3,7 +3,7 @@ import { setContext } from "@apollo/client/link/context";
 import { createUploadLink } from "apollo-upload-client";
 import { onError } from "apollo-link-error";
 
-const GRAPHQL_SERVER = "http://localhost:4000/graphql";
+const GRAPHQL_SERVER = process.env.REACT_APP_GRAPHQL_ADDRESS;
 
 const errorLink = onError(({ graphQLErrors }) => {
   if (graphQLErrors) graphQLErrors.map(({ message }) => console.log(message));
