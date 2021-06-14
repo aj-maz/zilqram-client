@@ -32,9 +32,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MY_CONTENTS = gql`
-  query myContents {
-    myContents {
+const USER_CONTENTS = gql`
+  query userContents($userId: ID!) {
+    myContents(userId: $userId) {
       _id
       body
       variant
@@ -69,7 +69,9 @@ const ProfileContents = ({ me, user, setNftCounts, setContentCounts }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [tokensURI, setTokenURIs] = useState(null);
 
-  const { data, loading, error, refetch } = useQuery(MY_CONTENTS);
+  const { data, loading, error, refetch } = useQuery(USER_CONTENTS, {
+    userId: user._id
+  });
 
   const { data: collectionsData, loading: collectionLoading } = useQuery(
     USER_NFT_COLLECTIONS,
