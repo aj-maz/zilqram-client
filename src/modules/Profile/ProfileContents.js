@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 const USER_CONTENTS = gql`
   query userContents($userId: ID!) {
-    myContents(userId: $userId) {
+    userContents(userId: $userId) {
       _id
       body
       variant
@@ -82,7 +82,7 @@ const ProfileContents = ({ me, user, setNftCounts, setContentCounts }) => {
 
   useEffect(() => {
     if (data) {
-      setContentCounts(data.myContents.length);
+      setContentCounts(data.userContents.length);
     }
   }, [data]);
 
@@ -152,7 +152,7 @@ const ProfileContents = ({ me, user, setNftCounts, setContentCounts }) => {
             <div className={classes.section}>
               <Row>
                 <Col lg={6}>
-                  {[...data.myContents.filter((c, i) => i % 2 === 0)]
+                  {[...data.userContents.filter((c, i) => i % 2 === 0)]
                     .reverse()
                     .map((content) => (
                       <ContentMeta key={content._id}>
@@ -181,7 +181,7 @@ const ProfileContents = ({ me, user, setNftCounts, setContentCounts }) => {
                     ))}
                 </Col>
                 <Col lg={6}>
-                  {[...data.myContents.filter((c, i) => i % 2 !== 0)]
+                  {[...data.userContents.filter((c, i) => i % 2 !== 0)]
                     .reverse()
                     .map((content) => (
                       <ContentMeta>
