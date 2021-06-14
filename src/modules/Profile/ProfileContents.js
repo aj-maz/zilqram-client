@@ -70,7 +70,7 @@ const ProfileContents = ({ me, user, setNftCounts, setContentCounts }) => {
   const [tokensURI, setTokenURIs] = useState(null);
 
   const { data, loading, error, refetch } = useQuery(USER_CONTENTS, {
-    userId: user._id
+    variables: { userId: user._id },
   });
 
   const { data: collectionsData, loading: collectionLoading } = useQuery(

@@ -57,8 +57,6 @@ const ProfilePage = ({ data, refetch, loading }) => {
     variables: { _id: userId ? userId : "" },
   });
 
-  console.log(userId, userData);
-
   if (userId && userLoading)
     return (
       <div className={classes.loadingContainer}>
@@ -68,10 +66,8 @@ const ProfilePage = ({ data, refetch, loading }) => {
 
   if (userId && userData) {
     const user = userData.user;
-
-    console.log("i know im here");
-
-    const me = me ? data.me : {};
+    
+    const me = data.me ? data.me : {};
 
     return (
       <div>
