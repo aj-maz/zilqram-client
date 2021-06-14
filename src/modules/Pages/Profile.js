@@ -71,7 +71,7 @@ const ProfilePage = ({ data, refetch, loading }) => {
 
     console.log("i know im here");
 
-    const me = data.me;
+    const me = me ? data.me : {};
 
     return (
       <div>
