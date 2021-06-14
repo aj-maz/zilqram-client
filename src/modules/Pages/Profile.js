@@ -49,11 +49,15 @@ const ProfilePage = ({ data, refetch, loading }) => {
   const [nftCounts, setNftCounts] = useState(0);
   const [contentCounts, setContentCounts] = useState(0);
 
-  const { userId } = useParams();
+  const params = useParams();
+
+  const { userId } = params;
 
   const { data: userData, loading: userLoading } = useQuery(User, {
-    _id: userId ? userId : "",
+    variables: { _id: userId ? userId : "" },
   });
+
+  console.log(userId, userData);
 
   if (userId && userLoading)
     return (
@@ -64,6 +68,8 @@ const ProfilePage = ({ data, refetch, loading }) => {
 
   if (userId && userData) {
     const user = userData.user;
+
+    console.log("i know im here");
 
     const me = data.me;
 
@@ -78,13 +84,18 @@ const ProfilePage = ({ data, refetch, loading }) => {
                 name={user.displayName}
                 nfts={nftCounts}
                 contents={contentCounts}
-                followers={user.followers? user.followers.legnth: 0}
+                followers={user.followers ? user.followers.legnth : 0}
                 followings={user.followings ? user.followings.legnth : 0}
               />
             </div>
           </Col>
           <Col md={9}>
-            <ProfileContents user={user} me={me} />
+            <ProfileContents
+              setNftCounts={setNftCounts}
+              setContentCounts={setContentCounts}
+              user={user}
+              me={me}
+            />
           </Col>
         </Row>
       </div>
@@ -126,7 +137,7 @@ const ProfilePage = ({ data, refetch, loading }) => {
                 name={user.displayName}
                 nfts={nftCounts}
                 contents={contentCounts}
-                followers={user.followers? user.followers.legnth: 0}
+                followers={user.followers ? user.followers.legnth : 0}
                 followings={user.followings ? user.followings.legnth : 0}
               />
             </div>
